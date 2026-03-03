@@ -154,6 +154,8 @@ export default function NewEventPage() {
     headcount: "",
   });
   const [created, setCreated] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (step === 2 && selectedType && tasks.length === 0) {
@@ -179,14 +181,53 @@ export default function NewEventPage() {
       !!details.endDate &&
       !!details.venue);
 
+  const validateStep = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (step === 3) {
+      if (!details.name.trim()) {
+        newErrors.name = "Event name is required";
+      }
+      if (!details.startDate) {
+        newErrors.startDate = "Start date is required";
+      }
+      if (!details.endDate) {
+        newErrors.endDate = "End date is required";
+      }
+      if (!details.venue.trim()) {
+        newErrors.venue = "Venue is required";
+      }
+      if (details.startDate && details.endDate && details.startDate >= details.endDate) {
+        newErrors.endDate = "End date must be after start date";
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleNext = () => {
     if (step === 4) {
+      // Validate before creating
+      if (!validateStep()) {
+        return;
+      }
+      
       setCreated(true);
+      setShowToast(true);
+      
+      // Redirect after a delay
       setTimeout(() => {
-        setCreated(false);
+        window.location.href = "/dashboard/events";
       }, 2000);
+      
       return;
     }
+    
+    if (step === 3 && !validateStep()) {
+      return;
+    }
+    
     if (!canGoNext) return;
     setStep((s) => Math.min(4, s + 1));
   };
@@ -407,15 +448,23 @@ export default function NewEventPage() {
                     </label>
                     <input
                       value={details.name}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setDetails((prev) => ({
                           ...prev,
                           name: e.target.value,
-                        }))
-                      }
-                      className="mt-1 w-full rounded-xl border border-white/20 bg-black/40 px-3 py-2 text-sm text-slate-100 outline-none ring-emerald/0 focus:ring-2"
+                        }));
+                        if (errors.name) {
+                          setErrors(prev => ({ ...prev, name: '' }));
+                        }
+                      }}
+                      className={`mt-1 w-full rounded-xl border bg-black/40 px-3 py-2 text-sm text-slate-100 outline-none ring-emerald/0 focus:ring-2 ${
+                        errors.name ? 'border-red-500 ring-red-500/20' : 'border-white/20'
+                      }`}
                       placeholder="Eg. Spring Fest Night Market"
                     />
+                    {errors.name && (
+                      <p className="mt-1 text-xs text-red-400">{errors.name}</p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs text-slate-300">
@@ -445,14 +494,22 @@ export default function NewEventPage() {
                       <input
                         type="datetime-local"
                         value={details.startDate}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setDetails((prev) => ({
                             ...prev,
                             startDate: e.target.value,
-                          }))
-                        }
-                        className="mt-1 w-full rounded-xl border border-white/20 bg-black/40 px-3 py-2 text-xs text-slate-100 outline-none ring-emerald/0 focus:ring-2"
+                          }));
+                          if (errors.startDate) {
+                            setErrors(prev => ({ ...prev, startDate: '' }));
+                          }
+                        }}
+                        className={`mt-1 w-full rounded-xl border bg-black/40 px-3 py-2 text-xs text-slate-100 outline-none ring-emerald/0 focus:ring-2 ${
+                          errors.startDate ? 'border-red-500 ring-red-500/20' : 'border-white/20'
+                        }`}
                       />
+                      {errors.startDate && (
+                        <p className="mt-1 text-xs text-red-400">{errors.startDate}</p>
+                      )}
                     </div>
                     <div>
                       <label className="text-xs text-slate-300">
@@ -461,29 +518,45 @@ export default function NewEventPage() {
                       <input
                         type="datetime-local"
                         value={details.endDate}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setDetails((prev) => ({
                             ...prev,
                             endDate: e.target.value,
-                          }))
-                        }
-                        className="mt-1 w-full rounded-xl border border-white/20 bg-black/40 px-3 py-2 text-xs text-slate-100 outline-none ring-emerald/0 focus:ring-2"
+                          }));
+                          if (errors.endDate) {
+                            setErrors(prev => ({ ...prev, endDate: '' }));
+                          }
+                        }}
+                        className={`mt-1 w-full rounded-xl border bg-black/40 px-3 py-2 text-xs text-slate-100 outline-none ring-emerald/0 focus:ring-2 ${
+                          errors.endDate ? 'border-red-500 ring-red-500/20' : 'border-white/20'
+                        }`}
                       />
+                      {errors.endDate && (
+                        <p className="mt-1 text-xs text-red-400">{errors.endDate}</p>
+                      )}
                     </div>
                   </div>
                   <div>
                     <label className="text-xs text-slate-300">Venue</label>
                     <input
                       value={details.venue}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setDetails((prev) => ({
                           ...prev,
                           venue: e.target.value,
-                        }))
-                      }
-                      className="mt-1 w-full rounded-xl border border-white/20 bg-black/40 px-3 py-2 text-sm text-slate-100 outline-none ring-emerald/0 focus:ring-2"
+                        }));
+                        if (errors.venue) {
+                          setErrors(prev => ({ ...prev, venue: '' }));
+                        }
+                      }}
+                      className={`mt-1 w-full rounded-xl border bg-black/40 px-3 py-2 text-sm text-slate-100 outline-none ring-emerald/0 focus:ring-2 ${
+                        errors.venue ? 'border-red-500 ring-red-500/20' : 'border-white/20'
+                      }`}
                       placeholder="Eg. Central Quad"
                     />
+                    {errors.venue && (
+                      <p className="mt-1 text-xs text-red-400">{errors.venue}</p>
+                    )}
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
@@ -674,15 +747,22 @@ export default function NewEventPage() {
       </div>
 
       <AnimatePresence>
-        {created && (
+        {showToast && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-6 right-6 z-30 flex items-center gap-2 rounded-full bg-emerald px-4 py-2 text-xs font-semibold text-navy shadow-[0_18px_50px_rgba(16,185,129,0.8)]"
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-emerald-500 px-6 py-4 text-sm font-semibold text-navy shadow-[0_20px_60px_rgba(16,185,129,0.4)]"
           >
-            <Wand2 className="h-4 w-4" />
-            Event created (mock) – wire this up to your backend next.
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600">
+              <svg className="h-4 w-4 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <div className="font-semibold">Event created successfully!</div>
+              <div className="text-xs text-emerald-700">Redirecting to events...</div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
