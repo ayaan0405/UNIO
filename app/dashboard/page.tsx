@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import {
   DndContext,
+  closestCenter,
   PointerSensor,
   useSensor,
   useSensors,
@@ -984,7 +985,7 @@ export default function DashboardHome() {
         {/* WIDGET BOARD */}
         <DndContext
           sensors={sensors}
-          collisionDetection={rectSortingStrategy}
+          collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
           <SortableContext

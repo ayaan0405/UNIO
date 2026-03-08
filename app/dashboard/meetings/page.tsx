@@ -568,9 +568,6 @@ export default function MeetingsPage() {
         <motion.div key={view} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
           {view === "list" ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-              {grouped.ongoing?.length > 0 && (
-                <Section label="Happening Now" color="#10B981" meetings={grouped.today} onSelect={setSelected} offset={0} />
-              )}
               {grouped.today.length > 0 && (
                 <Section label="Today" color="#F59E0B" meetings={grouped.today} onSelect={setSelected} offset={0} />
               )}
