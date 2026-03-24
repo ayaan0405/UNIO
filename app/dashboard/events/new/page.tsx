@@ -73,6 +73,27 @@ export default function NewEventPage() {
   const handleNext = () => {
     if (step === 4) {
       if (!validate()) return;
+      // FIX 5: save new event to localStorage so it appears on events page
+      try {
+        const stored = localStorage.getItem("unio_events");
+        const existing = stored ? JSON.parse(stored) : [];
+        const newEvent = {
+          id: details.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + Date.now(),
+          name: details.name,
+          type: selectedType?.label.split(" ")[0] || "Other",
+          description: details.description || "",
+          date: details.startDate ? new Date(details.startDate).toLocaleDateString("en-IN", { month: "short", day: "numeric" }) + " · " + new Date(details.startDate).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "TBD",
+          venue: details.venue,
+          participants: 0,
+          completion: Math.round((tasks.filter(t => t.done).length / Math.max(tasks.length, 1)) * 100),
+          status: "upcoming",
+          tasksDone: tasks.filter(t => t.done).length,
+          tasksTotal: tasks.length,
+          daysRemaining: details.startDate ? Math.max(0, Math.ceil((new Date(details.startDate).getTime() - Date.now()) / 86400000)) : 0,
+          assignees: [],
+        };
+        localStorage.setItem("unio_events", JSON.stringify([newEvent, ...existing]));
+      } catch {}
       setShowToast(true);
       setTimeout(() => { window.location.href = "/dashboard/events"; }, 2200);
       return;
