@@ -211,9 +211,8 @@ export default function PropertiesPanel() {
     <div
       id="properties-panel"
       style={{
-        width: 260, flexShrink: 0,
-        borderLeft: '1px solid rgba(255,255,255,0.06)',
-        background: '#2B2D30', // Android Studio styling color
+        flex: 1,
+        background: '#2B2D30',
         display: 'flex', flexDirection: 'column',
         overflowY: 'auto',
         color: '#DFE1E5',

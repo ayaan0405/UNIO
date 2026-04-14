@@ -103,6 +103,31 @@ const actionBtnStyle: React.CSSProperties = {
   padding: 0,
 };
 
+export function LayersList() {
+  const { layers, selectedObjects } = useFabric();
+  const selectedObj = selectedObjects[0];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '4px 0' }}>
+      <AnimatePresence>
+        {layers.length === 0 ? (
+          <div style={{ padding: '16px 8px', fontSize: 10, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
+            No objects on canvas
+          </div>
+        ) : (
+          layers.map(item => (
+            <LayerRow
+              key={item.id}
+              item={item}
+              isSelected={selectedObj === item.object}
+            />
+          ))
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function LayersPanel() {
   const { layers, selectedObjects } = useFabric();
   const selectedObj = selectedObjects[0];

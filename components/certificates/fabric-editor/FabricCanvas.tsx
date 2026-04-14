@@ -152,15 +152,31 @@ export default function FabricCanvas({ width = 1123, height = 794 }: FabricCanva
     }
   }, [zoom, width, height]);
 
-  // Initial fit to screen
+  // Fit to screen — re-runs whenever container resizes (handles collapsible sidebars)
+  const applyFit = useCallback(() => {
+    if (!containerRef.current || !fabricCanvasRef.current) return;
+    const { clientWidth, clientHeight } = containerRef.current;
+    if (clientWidth === 0 || clientHeight === 0) return;
+    const padding = 80;
+    const fitZoom = Math.min(
+      (clientWidth - padding) / width,
+      (clientHeight - padding) / height,
+      1,
+    );
+    fabricCanvasRef.current.setDimensions({ width: width * fitZoom, height: height * fitZoom });
+    fabricCanvasRef.current.setZoom(fitZoom);
+    setFitZoomLevel(fitZoom);
+    setZoom(fitZoom);
+  }, [width, height, setFitZoomLevel, setZoom]);
+
   useEffect(() => {
-    if (containerRef.current && fabricCanvasRef.current) {
-      const { clientWidth, clientHeight } = containerRef.current;
-      // Add bigger padding (160 instead of 80) so it's not zoomed in too tightly
-      const fitZoom = Math.min((clientWidth - 160) / width, (clientHeight - 160) / height, 1);
-      setZoom(fitZoom);
-      setFitZoomLevel(fitZoom);
-    }
+    const timer = setTimeout(applyFit, 50);
+    const observer = new ResizeObserver(applyFit);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
