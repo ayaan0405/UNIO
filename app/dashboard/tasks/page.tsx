@@ -206,7 +206,7 @@ export default function MyTasksPage() {
   ].filter(s => s.tasks.length > 0);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0F1117", padding: 24, fontFamily: "'DM Sans',system-ui,sans-serif", color: "white", maxWidth: 900, margin: "0 auto" }}>
+    <div style={{ fontFamily: "'DM Sans',system-ui,sans-serif", color: "white" }}>
 
       <div style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#6366F1,#10B981)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800 }}>A</div>
@@ -257,7 +257,7 @@ export default function MyTasksPage() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginBottom: 24 }}>
         {Object.entries(byEvent).map(([name, evTasks]) => (
           <EventProgressCard key={name} name={name} tasks={evTasks} color={EVENT_COLORS[name] ?? "#6366F1"}
             isActive={eventFilter === name}

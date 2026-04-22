@@ -511,7 +511,7 @@ export default function MeetingsPage() {
   }, [filtered]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0F1117", padding: 24, fontFamily: "'DM Sans',system-ui,sans-serif", color: "white", maxWidth: 960, margin: "0 auto" }}>
+    <div style={{ fontFamily: "'DM Sans',system-ui,sans-serif", color: "white" }}>
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24, gap: 16, flexWrap: "wrap" }}>
@@ -526,7 +526,7 @@ export default function MeetingsPage() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 12, marginBottom: 20 }}>
         {[
           { label: "Total",     value: stats.total,     color: "#818CF8" },
           { label: "Upcoming",  value: stats.upcoming,  color: "#6366F1" },

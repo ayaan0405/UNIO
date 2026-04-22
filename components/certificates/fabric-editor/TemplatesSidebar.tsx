@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight, ChevronDown, Upload, Square, Circle,
-  Triangle, Type, Plus, Minus
+  Triangle, Type,
 } from 'lucide-react';
 import { useFabric, CERT_WIDTH, CERT_HEIGHT } from './FabricContext';
 import { CERT_TEMPLATES, TemplateData } from './templates-data';
@@ -84,8 +84,6 @@ function TemplateMiniPreview({ t }: { t: TemplateData }) {
 
 export default function TemplatesSidebar() {
   const { loadJSON, addRect, addCircle, addText, canvas, pushHistory, refreshLayers } = useFabric();
-  const imgInputRef = useRef<HTMLInputElement>(null);
-  const tmplInputRef = useRef<HTMLInputElement>(null);
 
   const handleTemplateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -196,48 +194,53 @@ export default function TemplatesSidebar() {
         color: '#DFE1E5',
       }}
     >
+      {/* ── Pinned upload bar — always visible ── */}
+      <div style={{
+        display: 'flex', gap: 6, padding: '8px',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        flexShrink: 0,
+      }}>
+        {/* Template upload — label wrapping input is the reliable way */}
+        <label style={{
+          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+          padding: '7px 4px', borderRadius: 6, cursor: 'pointer',
+          background: 'rgba(99,102,241,0.1)',
+          border: '1px dashed rgba(99,102,241,0.35)',
+          color: '#818CF8', fontSize: 10, fontWeight: 600, transition: 'all 0.15s',
+          userSelect: 'none',
+        }}>
+          <Upload size={11} /> Template
+          <input
+            type="file"
+            accept=".json,application/json,image/jpeg,image/png,image/jpg"
+            onChange={handleTemplateUpload}
+            style={{ display: 'none' }}
+          />
+        </label>
+
+        {/* Background image upload */}
+        <label style={{
+          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+          padding: '7px 4px', borderRadius: 6, cursor: 'pointer',
+          background: 'rgba(236,72,153,0.06)',
+          border: '1px dashed rgba(236,72,153,0.35)',
+          color: '#EC4899', fontSize: 10, fontWeight: 600, transition: 'all 0.15s',
+          userSelect: 'none',
+        }}>
+          <Upload size={11} /> Bg Image
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleBgUpload}
+            style={{ display: 'none' }}
+          />
+        </label>
+      </div>
+
+      {/* ── Scrollable content ── */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
-        <AccordionSection title="Templates" 
-          extra={<><Plus size={12} color="rgba(255,255,255,0.4)"/><Minus size={12} color="rgba(255,255,255,0.4)"/></>}
-        >
+        <AccordionSection title="Templates">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            
-            <div style={{ display: 'flex', gap: 6 }}>
-              <motion.button
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => tmplInputRef.current?.click()}
-                style={{
-                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px',
-                  borderRadius: 6, cursor: 'pointer',
-                  background: 'rgba(99,102,241,0.1)',
-                  border: '1px dashed rgba(99,102,241,0.3)',
-                  color: '#818CF8', fontSize: 10, fontWeight: 600,
-                  transition: 'all 0.15s',
-                }}
-              >
-                <Upload size={12} /> Template
-              </motion.button>
-              <input ref={tmplInputRef} type="file" accept=".json,application/json,image/jpeg,image/png,image/jpg,application/pdf" onChange={handleTemplateUpload} style={{ display: 'none' }} />
-
-              <motion.button
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => imgInputRef.current?.click()}
-                style={{
-                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px',
-                  borderRadius: 6, cursor: 'pointer',
-                  background: 'rgba(236,72,153,0.05)',
-                  border: '1px dashed rgba(236,72,153,0.3)',
-                  color: '#EC4899', fontSize: 10, fontWeight: 600,
-                  transition: 'all 0.15s',
-                }}
-              >
-                <Upload size={12} /> Bg Image
-              </motion.button>
-              <input ref={imgInputRef} type="file" accept="image/*" onChange={handleBgUpload} style={{ display: 'none' }} />
-            </div>
-
             {CERT_TEMPLATES.map(t => (
               <motion.button
                 key={t.id}
@@ -276,6 +279,7 @@ export default function TemplatesSidebar() {
             ))}
           </div>
         </AccordionSection>
+
 
         <AccordionSection title="Quick Add">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>

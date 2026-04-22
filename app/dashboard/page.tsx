@@ -796,7 +796,7 @@ export default function DashboardHome() {
         ))}
       </div>
 
-      <div className="space-y-6 py-2 sm:py-0">
+      <div className="space-y-6">
         <div className="mb-3 flex items-center justify-between">
           <div className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
             Dashboard overview

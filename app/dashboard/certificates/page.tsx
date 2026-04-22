@@ -84,9 +84,14 @@ function SidePanel({ side, tabs, defaultWidth = 280 }: SidePanelProps) {
               key={tab.id}
               onClick={() => {
                 if (collapsed) {
+                  // Always expand and switch to clicked tab
                   setCollapsed(false);
                   setActiveTab(tab.id);
+                } else if (tab.id === activeTab) {
+                  // Clicking the active tab collapses the panel
+                  setCollapsed(true);
                 } else {
+                  // Switch to the clicked tab (staying expanded)
                   setActiveTab(tab.id);
                 }
               }}

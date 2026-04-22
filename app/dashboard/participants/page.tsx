@@ -196,8 +196,8 @@ export default function ParticipantsPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0F1117', color: '#fff', fontFamily: 'ui-sans-serif, system-ui, sans-serif', padding: '24px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+    <div style={{ color: '#fff', fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
+      <div>
 
         {/* ── Header ── */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
@@ -331,7 +331,8 @@ export default function ParticipantsPage() {
         </div>
 
         {/* ── Table ── */}
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, overflow: 'hidden', minWidth: 700 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1.2fr 80px', gap: 0, padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
             {['Participant', 'Contact', 'Roll No', 'Dept', 'Status', ''].map(h => (
               <span key={h} style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)' }}>{h}</span>
@@ -420,6 +421,7 @@ export default function ParticipantsPage() {
             )}
           </AnimatePresence>
         </div>
+        </div>{/* end overflow wrapper */}
 
         <p style={{ marginTop: 12, fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'right' }}>
           Showing {filtered.length} of {participants.length} participants · Capacity {stats.capacity}
