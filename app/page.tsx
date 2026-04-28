@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useSpring, useInView, AnimatePresence } from 'framer-motion';
 import {
   Calendar, QrCode, Bell, Users, BarChart3, CheckCircle2,
   ArrowRight, Clock, MapPin, Zap, Shield
@@ -86,42 +86,57 @@ function WordCycleSection() {
   const totalWords = CYCLE_WORDS.length; // 8
   const wordFraction = totalWords / (totalWords + 1); // 8/9
 
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end end'] });
-
   const [activeIdx, setActiveIdx] = useState(0);
   const [isPastSection, setIsPastSection] = useState(false);
+  const [isBeforeSection, setIsBeforeSection] = useState(true);
+
+  // ── Manually track scroll progress against the container's
+  //    position in the document. This is more reliable than
+  //    framer-motion target-based useScroll because it works
+  //    even when html/body have height constraints or when
+  //    the scroll container is the window.
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const sectionH = el.offsetHeight;
+      const viewH = window.innerHeight;
+      // scrolled = how far the top of the section is above the viewport top
+      // range: [0 (not yet scrolled to), sectionH - viewH (fully scrolled through)]
+      const scrolled = -rect.top;
+      const rawProgress = scrolled / (sectionH - viewH);
+      const clamped = Math.max(0, Math.min(1, rawProgress));
+      setProgress(clamped);
+      setIsBeforeSection(rect.top > 0);
+      setIsPastSection(clamped >= 1);
+
+      const wordProgress = Math.min(clamped / wordFraction, 1);
+      const idx = Math.min(Math.floor(wordProgress * totalWords), totalWords - 1);
+      setActiveIdx(idx);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // run once on mount
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [wordFraction, totalWords]);
 
   const isUnio = activeIdx === totalWords - 1;
 
-  useEffect(() => {
-    return scrollYProgress.on('change', (v) => {
-      const wordProgress = Math.min(v / wordFraction, 1);
-      const idx = Math.min(Math.floor(wordProgress * totalWords), totalWords - 1);
-      setActiveIdx(idx);
-      setIsPastSection(v >= 1);
-    });
-  }, [scrollYProgress, wordFraction, totalWords]);
-
   // Scroll transition transforms for "go UNIO." screen
-  const goOpacity   = useTransform(scrollYProgress, [wordFraction, wordFraction + 0.04], [1, 0]);
-  const unioScale   = useTransform(scrollYProgress, [wordFraction, 1], [1, 2.2]);
-  const unioOpacity = useTransform(scrollYProgress, [wordFraction, 0.96, 1], [1, 0.12, 0]);
-  const unioBlur    = useTransform(scrollYProgress, [wordFraction, 1], [0, 10]);
+  const goOpacityV   = isUnio ? Math.max(0, 1 - (progress - wordFraction) / 0.04) : 1;
+  const unioScaleV   = 1 + (progress - wordFraction) / (1 - wordFraction) * 1.2;
+  const unioOpacityV = isUnio
+    ? Math.max(0, 1 - Math.max(0, progress - wordFraction) / (1 - wordFraction) * (1 / 0.96))
+    : 1;
+  const unioBlurV    = isUnio
+    ? Math.max(0, (progress - wordFraction) / (1 - wordFraction)) * 10
+    : 0;
 
-  const [goOpacityV,   setGoOpacityV]   = useState(1);
-  const [unioScaleV,   setUnioScaleV]   = useState(1);
-  const [unioOpacityV, setUnioOpacityV] = useState(1);
-  const [unioBlurV,    setUnioBlurV]    = useState(0);
-
-  useEffect(() => {
-    const unsubs = [
-      goOpacity.on('change',   v => setGoOpacityV(v)),
-      unioScale.on('change',   v => setUnioScaleV(v)),
-      unioOpacity.on('change', v => setUnioOpacityV(v)),
-      unioBlur.on('change',    v => setUnioBlurV(v)),
-    ];
-    return () => unsubs.forEach(u => u());
-  }, [goOpacity, unioScale, unioOpacity, unioBlur]);
+  // Only show the overlay while we're inside the section
+  const overlayVisible = !isBeforeSection && !isPastSection;
 
   return (
     <div ref={containerRef} style={{ position: 'relative', height: `${(totalWords + 1) * 100}vh`, backgroundColor: '#0F1117' }}>
@@ -129,8 +144,9 @@ function WordCycleSection() {
         position: 'fixed', top: 0, left: 0, right: 0, height: '100vh',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden', zIndex: 10, pointerEvents: 'none',
-        opacity: isPastSection ? 0 : 1,
-        transition: 'opacity 0.15s',
+        opacity: overlayVisible ? 1 : 0,
+        visibility: overlayVisible ? 'visible' : 'hidden',
+        transition: 'opacity 0.2s ease, visibility 0.2s ease',
       }}>
 
         {/* Background glow */}
@@ -153,7 +169,6 @@ function WordCycleSection() {
         <div style={{
           position: 'relative', zIndex: 1,
           overflow: isUnio ? 'visible' : 'hidden',
-          // For normal words: fixed height clip. For UNIO: open so it can scale
           height: isUnio ? 'auto' : '1.15em',
           fontSize: 'clamp(3.5rem, 11vw, 8rem)',
           fontWeight: 800,
@@ -217,10 +232,10 @@ function WordCycleSection() {
                   lineHeight: 1,
                   display: 'block',
                   textAlign: 'center',
-                  transform: `scale(${unioScaleV})`,
+                  transform: `scale(${Math.max(1, unioScaleV)})`,
                   transformOrigin: 'center center',
-                  opacity: unioOpacityV,
-                  filter: `blur(${unioBlurV}px)`,
+                  opacity: Math.max(0, Math.min(1, unioOpacityV)),
+                  filter: `blur(${Math.max(0, unioBlurV)}px)`,
                 }}>
                   UNIO.
                 </span>
